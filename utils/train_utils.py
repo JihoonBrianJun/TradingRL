@@ -119,5 +119,5 @@ def train_ppo_agents(Actor, actor_optimizer, actor_scheduler,
         print(f'Step {step} Actor Average Loss: {actor_step_avg_loss}')
         print(f'Step {step} Critic Average Loss: {critic_step_avg_loss}')
     
-    test_ppo_agents(Actor, horizon, window, fee, test_state_list, bs, device, save_dir, train_config, best_avg_reward,
+    test_ppo_agents(Actor, horizon, window, fee, test_state_list, bs*(horizon-window), device, save_dir, train_config, best_avg_reward,
                     save_ckpt=False, load_ckpt=True)

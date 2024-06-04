@@ -53,6 +53,8 @@ def compute_reward(state_window_list, actor_output_list, horizon, window, fee):
         position += action
         action_list.append(action)
         reward_list.append(reward)
+    reward_list[-1] = reward_list[-1] + (window_close_price - vwap) * position
+    
     return action_list, reward_list
     
 
