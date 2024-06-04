@@ -71,10 +71,10 @@ def train_ppo_agents(Actor, actor_optimizer, actor_scheduler,
             if avg_reward > best_avg_reward:
                 best_avg_reward = avg_reward
             
-        bs = min(bs, sample_size)
         sample_idx = np.random.choice(np.arange(len(train_state_list)), size=sample_size, replace=False)
         trajectory_list = compute_trajectory(train_state_list[sample_idx], Actor, Critic, horizon, window, fee, device, bs)
-        train_loader = DataLoader(trajectory_list, batch_size=bs//(horizon-window-1), shuffle=True)
+        bs = min(bs//(horizon-window-1), sample_size)
+        train_loader = DataLoader(trajectory_list, batch_size=bs, shuffle=True)
         
         Actor.train()
         Critic.train()
