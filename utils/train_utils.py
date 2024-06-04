@@ -74,7 +74,7 @@ def train_ppo_agents(Actor, actor_optimizer, actor_scheduler,
         bs = min(bs, sample_size)
         sample_idx = np.random.choice(np.arange(len(train_state_list)), size=sample_size, replace=False)
         trajectory_list = compute_trajectory(train_state_list[sample_idx], Actor, Critic, horizon, window, fee, device, bs)
-        train_loader = DataLoader(trajectory_list, batch_size=bs, shuffle=True)
+        train_loader = DataLoader(trajectory_list, batch_size=bs//(horizon-window-1), shuffle=True)
         
         Actor.train()
         Critic.train()
