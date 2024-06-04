@@ -63,6 +63,7 @@ def train_ppo_agents(Actor, actor_optimizer, actor_scheduler,
                      train_state_list, test_state_list, bs, device,
                      save_dir, train_config):
     
+    bs = min(bs, sample_size)
     best_avg_reward = -np.inf
     nan_stop = False
     for step in range(step):
@@ -72,8 +73,7 @@ def train_ppo_agents(Actor, actor_optimizer, actor_scheduler,
                 best_avg_reward = avg_reward
             
         sample_idx = np.random.choice(np.arange(len(train_state_list)), size=sample_size, replace=False)
-        trajectory_list = compute_trajectory(train_state_list[sample_idx], Actor, Critic, horizon, window, fee, device, bs)
-        bs = min(bs//(horizon-window-1), sample_size)
+        trajectory_list = compute_trajectory(train_state_list[sample_idx], Actor, Critic, horizon, window, fee, device, bs*(horizon-window))
         train_loader = DataLoader(trajectory_list, batch_size=bs, shuffle=True)
         
         Actor.train()
