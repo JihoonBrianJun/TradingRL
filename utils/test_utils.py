@@ -72,9 +72,16 @@ def test_ppo_agents(Actor, horizon, window, fee, state_list, bs, device, save_di
     state_windows, actor_outputs, _ = process_state_window(state_list, Actor, None, horizon, window, device, bs, process_critic=False)
     
     reward_sum_list = []
+    oneside_only_return_list = [], []
+    win = 0
     for state_idx in range(len(state_list)):
         action_list, reward_list = compute_reward(state_windows[state_idx], actor_outputs[state_idx], horizon, window, fee)
-        reward_sum_list.append(sum(reward_list))
+        reward_sum = sum(reward_list)
+        reward_sum_list.append(reward_sum)
+        oneside_only_return = np.abs(state_list[state_idx][-1][3] - state_list[state_idx][window-1][3])
+        oneside_only_return_list.append(oneside_only_return)
+        if reward_sum > oneside_only_return:
+            win += 1
         if state_idx == 0:
             state_close_prices = [np.round(minute_state[3], 4) for minute_state in state_list[state_idx]]
             df = pd.DataFrame(state_close_prices, columns=['prev_close_price'])
@@ -90,7 +97,10 @@ def test_ppo_agents(Actor, horizon, window, fee, state_list, bs, device, save_di
             print(f'reward sum: {sum(reward_list)}')
 
     avg_reward = sum(reward_sum_list) / len(state_list)
+    avg_oneside_return = sum(oneside_only_return_list) / len(state_list)
     print(f'Average Reward: {avg_reward} vs Best Average Reward: {best_avg_reward}')
+    print(f'Average Reward: {avg_reward} vs Average One Side Return: {avg_oneside_return}')
+    print(f'Win: {win} / {len(state_list)}')
 
     if save_ckpt and avg_reward > best_avg_reward:
         save_model(Actor, save_dir, train_config)
