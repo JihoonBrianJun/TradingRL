@@ -72,7 +72,7 @@ def test_ppo_agents(Actor, horizon, window, fee, state_list, bs, device, save_di
     state_windows, actor_outputs, _ = process_state_window(state_list, Actor, None, horizon, window, device, bs, process_critic=False)
     
     reward_sum_list = []
-    oneside_only_return_list = [], []
+    oneside_only_return_list = []
     win = 0
     for state_idx in range(len(state_list)):
         action_list, reward_list = compute_reward(state_windows[state_idx], actor_outputs[state_idx], horizon, window, fee)
