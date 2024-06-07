@@ -5,7 +5,7 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 from argparse import ArgumentParser
 
-from utils.preprocess import preprocess_state
+from utils.preprocess import preprocess_episode
 from utils.train_utils import train_ppo_agents
 from model.agent import ActorNetwork, CriticNetwork
 
@@ -22,24 +22,25 @@ def main(args):
                     "initial_lr": args.lr,
                     "gamma": args.gamma}
 
-    state_list = preprocess_state(args.data_path, args.horizon, args.hop)
-    train_state_list = state_list[:int(len(state_list)*args.train_ratio)]
-    test_state_list = state_list[int(len(state_list)*args.train_ratio):]
+    episode_list = preprocess_episode(args.data_path, args.horizon, args.hop, args.volume_normalizer)
+    train_episode_list = episode_list[:int(len(episode_list)*args.train_ratio)]
+    test_episode_list = episode_list[int(len(episode_list)*args.train_ratio):]
     
     if args.gpu:
         device = torch.device("cuda")
     else:
         device = torch.device("cpu")
 
-    Actor = ActorNetwork(model_dim=args.model_dim, 
+    Actor = ActorNetwork(action_bins = args.action_bins,
+                         model_dim=args.model_dim, 
                          n_head=args.n_head, 
                          num_layers=args.num_layers, 
-                         src_feature_dim=len(state_list[0][0]), 
+                         src_feature_dim=len(episode_list[0][0]), 
                          window=args.window).to(device)
     Critic = CriticNetwork(model_dim=args.model_dim,
                            n_head=args.n_head,
                            num_layers=args.num_layers,
-                           src_feature_dim=len(state_list[0][0]),
+                           src_feature_dim=len(episode_list[0][0]),
                            window=args.window).to(device)
 
     model_names = ["Actor", "Critic"]
@@ -56,10 +57,10 @@ def main(args):
     critic_scheduler = StepLR(critic_optimizer, step_size=1, gamma=args.gamma)
     critic_loss_func = nn.MSELoss()
     
-    train_ppo_agents(Actor, actor_optimizer, actor_scheduler,
+    train_ppo_agents(Actor, args.action_bins, actor_optimizer, actor_scheduler,
                      Critic, critic_optimizer, critic_scheduler, critic_loss_func,
-                     args.step, args.sample_size, args.horizon, args.window, args.fee, args.epsilon, 
-                     train_state_list, test_state_list, args.bs, device,
+                     args.epoch, args.step_per_epoch, args.sample_size, args.horizon, args.window, args.fee, args.epsilon, 
+                     train_episode_list, test_episode_list, args.bs, device,
                      save_dir, train_config)
                     
 
@@ -67,8 +68,10 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--data_path', type=str, default='data/')
     parser.add_argument('--save_dir', type=str, default='ckpt/rl')
-    parser.add_argument('--step', type=int, default=10000)
-    parser.add_argument('--sample_size', type=int, default=512)
+    parser.add_argument('--epoch', type=int, default=10000)
+    parser.add_argument('--step_per_epoch', type=int, default=10)
+    parser.add_argument('--action_bins', type=int, default=41)
+    parser.add_argument('--sample_size', type=int, default=1024)
     parser.add_argument('--horizon', type=int, default=250)
     parser.add_argument('--hop', type=int, default=50)
     parser.add_argument('--window', type=int, default=150)

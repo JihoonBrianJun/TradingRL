@@ -1,7 +1,6 @@
 import math
 import torch
 import torch.nn as nn
-from torch.nn import TransformerEncoder
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 5000):
@@ -43,24 +42,30 @@ class StateEncoder(nn.Module):
         src = self.src_pos_emb(self.src_proj(src))
         if src_mask is not None:
             src_mask = src_mask.to(src.device)
-        emb = self.transformer_encoder(src, mask=src_mask)
-        return self.out_proj2(self.out_proj1(emb).squeeze(-1)).squeeze(-1)
+        return self.transformer_encoder(src, mask=src_mask)
 
 
 class ActorNetwork(nn.Module):
-    def __init__(self, model_dim, n_head, num_layers, src_feature_dim, window):
+    def __init__(self, action_bins, model_dim, n_head, num_layers, src_feature_dim, window):
         super().__init__()
+        self.window = window
+        self.model_dim = model_dim
         self.state_transformer = StateEncoder(model_dim, n_head, num_layers, src_feature_dim, window)
+        self.out_proj = nn.Linear(window * model_dim, action_bins)
     
     def forward(self, src, src_mask=None):
-        out = self.state_transformer(src, src_mask)
-        return 2 * torch.sigmoid(out) - 1
+        emb = self.state_transformer(src, src_mask)
+        out = self.out_proj(emb.view(-1, self.window * self.model_dim))
+        return torch.softmax(out, dim=1)
 
 
 class CriticNetwork(nn.Module):
     def __init__(self, model_dim, n_head, num_layers, src_feature_dim, window):
         super().__init__()
         self.state_transformer = StateEncoder(model_dim, n_head, num_layers, src_feature_dim, window)
+        self.out_proj1 = nn.Linear(model_dim, 1)
+        self.out_proj2 = nn.Linear(window, 1)
     
     def forward(self, src, src_mask=None):
-        return self.state_transformer(src, src_mask)
+        emb = self.state_transformer(src, src_mask)
+        return self.out_proj2(self.out_proj1(emb).squeeze(-1)).squeeze(-1)

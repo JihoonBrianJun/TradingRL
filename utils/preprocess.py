@@ -42,9 +42,9 @@ def preprocess_csv(data_path, data_len, data_hop, pred_len, volume_normalizer):
     return data
 
 
-def preprocess_state(data_path, horizon, hop):
-    print("Preprocessing states..")
-    state_list = []
+def preprocess_episode(data_path, horizon, hop):
+    print("Preprocessing episodes..")
+    episode_list = []
     for file in os.listdir(data_path):
         if file.endswith("csv"):
             df = pd.read_csv(os.path.join(data_path, file)).sort_values(by='Date').reset_index(drop=True)
@@ -53,12 +53,12 @@ def preprocess_state(data_path, horizon, hop):
             df = df[['Open', 'High', 'Low', 'Close', 'Volume']]
             
             for idx in range((df.shape[0]-horizon)//hop):
-                state_df = df.iloc[idx*hop:idx*hop+horizon]
-                state_base_price = state_df['Open'].iloc[0]
+                episode_df = df.iloc[idx*hop:idx*hop+horizon]
+                episode_base_price = episode_df['Open'].iloc[0]
                 for price_key in ['Open', 'High', 'Low', 'Close']:
-                    state_df[price_key] = (state_df[price_key] - state_base_price) / state_base_price * 100
-                state_list.append(state_df.to_numpy())
+                    episode_df[price_key] = (episode_df[price_key] - episode_base_price) / episode_base_price * 100
+                episode_list.append(episode_df.to_numpy())
     
-    print(f'Completed preprocessing states..\nstate_list len: {len(state_list)}')
+    print(f'Completed preprocessing episodes..\nepisode_list len: {len(episode_list)}')
     
-    return np.stack(state_list, axis=0)
+    return np.stack(episode_list, axis=0)
