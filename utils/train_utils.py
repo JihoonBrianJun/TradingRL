@@ -103,7 +103,7 @@ def train_ppo_agents(Actor, action_bins, actor_optimizer, actor_scheduler,
                 critic_scheduler.step()
                 critic_step_loss += critic_loss.detach().cpu().item()
                 
-                if actor_loss == np.nan or critic_loss == np.nan:
+                if torch.isnan(actor_loss) or torch.isnan(critic_loss):
                     nan_stop = True
                     break
             if nan_stop:
