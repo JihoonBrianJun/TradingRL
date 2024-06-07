@@ -55,12 +55,12 @@ def compute_reward(state_list, actor_output_list, action_bins, horizon, window, 
         position += action
         action_list.append(action)
         reward_list.append(reward)
-    reward_list[-1] = reward_list[-1] + (window_close_price - vwap) * position
+    reward_list[-1] = reward_list[-1] + (window_close_price - vwap) * position - fee * (100 + window_close_price) * np.abs(position)
     
     return action_list, reward_list
     
 
-def compute_trajectory(episode_list, Actor, action_bins, Critic, horizon, window, fee, device, state_bs):
+def compute_trajectory(episode_list, Actor, action_bins, Critic, horizon, window, fee, device, td, state_bs):
     states, actor_probs, actor_outputs, critic_outputs = process_state(episode_list, Actor, Critic, horizon, window, device, state_bs)
     
     trajectory_list = []
@@ -69,11 +69,12 @@ def compute_trajectory(episode_list, Actor, action_bins, Critic, horizon, window
         reward_to_go_list, advantage_list = [], []
         for t in range(horizon-window-1, -1, -1):
             reward = reward_list[t]
-            if t == horizon-window-1:
-                advantage_list.append(reward)
-                reward_to_go_list.append(reward)
+            if t >= horizon-window-td:
+                instantaneous_advantage = sum(reward_list[t:])
+                advantage_list.append(instantaneous_advantage + advantage_list[-1])
+                reward_to_go_list.append(reward + reward_to_go_list[-1])
             else:
-                instantaneous_advantage = reward + critic_outputs[episode_idx][t+1] - critic_outputs[episode_idx][t]
+                instantaneous_advantage = sum(reward_list[t:t+td]) + critic_outputs[episode_idx][t+td] - critic_outputs[episode_idx][t]
                 advantage_list.append(instantaneous_advantage + advantage_list[-1])
                 reward_to_go_list.append(reward + reward_to_go_list[-1])
         reward_to_go_list = reward_to_go_list[::-1]

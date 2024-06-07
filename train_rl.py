@@ -60,7 +60,7 @@ def main(args):
     train_ppo_agents(Actor, args.action_bins, actor_optimizer, actor_scheduler,
                      Critic, critic_optimizer, critic_scheduler, critic_loss_func,
                      args.epoch, args.step_per_epoch, args.sample_size, args.horizon, args.window, args.fee, args.epsilon, 
-                     train_episode_list, test_episode_list, args.bs, device,
+                     train_episode_list, test_episode_list, args.td, args.bs, device,
                      save_dir, train_config)
                     
 
@@ -75,6 +75,7 @@ if __name__ == '__main__':
     parser.add_argument('--horizon', type=int, default=60)
     parser.add_argument('--hop', type=int, default=20)
     parser.add_argument('--window', type=int, default=10)
+    parser.add_argument('--td', type=int, default=1)
     parser.add_argument('--fee', type=float, default=0.0003)
     parser.add_argument('--epsilon', type=float, default=0.1)
     parser.add_argument('--train_ratio', type=float, default=0.9)

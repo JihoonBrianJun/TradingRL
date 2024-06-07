@@ -60,7 +60,7 @@ def train_predictor(model, optimizer, scheduler, loss_function, max_norm,
 def train_ppo_agents(Actor, action_bins, actor_optimizer, actor_scheduler,
                      Critic, critic_optimizer, critic_scheduler, critic_loss_func,
                      epoch, step_per_epoch, sample_size, horizon, window, fee, epsilon, 
-                     train_episode_list, test_episode_list, bs, device,
+                     train_episode_list, test_episode_list, td, bs, device,
                      save_dir, train_config):
     
     bs = min(bs, sample_size)
@@ -73,7 +73,7 @@ def train_ppo_agents(Actor, action_bins, actor_optimizer, actor_scheduler,
                 best_avg_reward = avg_reward
             
         sample_idx = np.random.choice(np.arange(len(train_episode_list)), size=sample_size, replace=False)
-        trajectory_list = compute_trajectory(train_episode_list[sample_idx], Actor, action_bins, Critic, horizon, window, fee, device, bs*(horizon-window))
+        trajectory_list = compute_trajectory(train_episode_list[sample_idx], Actor, action_bins, Critic, horizon, window, fee, device, td, bs*(horizon-window))
         train_loader = DataLoader(trajectory_list, batch_size=bs, shuffle=True)
         
         Actor.train()

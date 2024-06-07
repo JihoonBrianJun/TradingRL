@@ -79,6 +79,7 @@ def test_ppo_agents(Actor, action_bins, horizon, window, fee, episode_list, bs, 
         reward_sum = sum(reward_list)
         reward_sum_list.append(reward_sum)
         long_only_return = episode_list[episode_idx][-1][3] - episode_list[episode_idx][window-1][3]
+        long_only_return -= fee * ((100 + episode_list[episode_idx][-1][3]) + (100 + episode_list[episode_idx][window-1][3]))
         long_only_return_list.append(long_only_return)
         if reward_sum > long_only_return:
             win += 1
@@ -99,7 +100,6 @@ def test_ppo_agents(Actor, action_bins, horizon, window, fee, episode_list, bs, 
     avg_reward = sum(reward_sum_list) / len(episode_list)
     avg_long_return = sum(long_only_return_list) / len(episode_list)
     print(f'Average Reward: {avg_reward} vs Best Average Reward: {best_avg_reward}')
-    print(f'Average Reward: {avg_reward} vs Average One Side Return: {avg_long_return}')
     print(f'Average Reward: {avg_reward} vs Average Long Only Return: {avg_long_return}')
     print(f'Win: {win} / {len(episode_list)}')
 
