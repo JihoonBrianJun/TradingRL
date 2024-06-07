@@ -1,1 +1,0 @@
-{"horizon": 150, "window": 10, "volume_normalizer": 18, "model_dim": 64, "n_head": 2, "num_layers": 2, "initial_lr": 0.0001, "gamma": 0.999}

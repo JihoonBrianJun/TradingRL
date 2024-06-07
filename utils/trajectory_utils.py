@@ -69,7 +69,10 @@ def compute_trajectory(episode_list, Actor, action_bins, Critic, horizon, window
         reward_to_go_list, advantage_list = [], []
         for t in range(horizon-window-1, -1, -1):
             reward = reward_list[t]
-            if t >= horizon-window-td:
+            if t == horizon-window-1:
+                advantage_list.append(reward)
+                reward_to_go_list.append(reward)
+            elif t >= horizon-window-td:
                 instantaneous_advantage = sum(reward_list[t:])
                 advantage_list.append(instantaneous_advantage + advantage_list[-1])
                 reward_to_go_list.append(reward + reward_to_go_list[-1])
