@@ -48,6 +48,7 @@ def preprocess_episode(data_path, horizon, hop):
     for file in os.listdir(data_path):
         if file.endswith("csv"):
             df = pd.read_csv(os.path.join(data_path, file)).sort_values(by='Date').reset_index(drop=True)
+            df['Volume'] = df['Volume'].replace({0: df['Volume'].mean()})
             df['Volume'] = df['Volume'].apply(lambda x: np.log(x))
             df['Volume'] = (df['Volume'] - df['Volume'].mean()) / df['Volume'].std()
             df = df[['Open', 'High', 'Low', 'Close', 'Volume']]

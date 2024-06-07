@@ -80,7 +80,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_ratio', type=float, default=0.9)
     parser.add_argument('--bs', type=int, default=128)
     parser.add_argument('--gpu', type=bool, default=False)
-    parser.add_argument('--lr', type=float, default=1e-4)
+    parser.add_argument('--lr', type=float, default=1e-5)
     parser.add_argument('--weight_decay', type=float, default=0.1)
     parser.add_argument('--gamma', type=float, default=0.999)
     parser.add_argument('--model_dim', type=int, default=512)
