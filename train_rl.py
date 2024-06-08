@@ -11,7 +11,7 @@ from model.agent import ActorNetwork, CriticNetwork
 
 
 def main(args):
-    save_dir = f'{args.save_dir}_{args.window}min'
+    save_dir = f'{args.save_dir}_{args.window}day'
     if not os.path.exists(save_dir.split('/')[0]):
         os.makedirs(save_dir.split('/')[0])
     train_config = {"horizon": args.horizon,
