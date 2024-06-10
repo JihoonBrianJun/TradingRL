@@ -49,7 +49,7 @@ Model configurations are shown in the table below.
 Train hyperparameters is summarized in the following table.
 
 |# epoch|Episode Sample Size|Batch Size|Learning Rate|Gamma (for StepLR)|
-|---|---|---|---|
+|---|---|---|---|---|
 |100|1024|128|1e-5|0.999|
 
 After training, metrics evaluated on validation data were as follows:
