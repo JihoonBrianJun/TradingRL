@@ -13,7 +13,7 @@ To be updated
 To begin with, clone this repo using the following command.
 ```
 git clone https://github.com/JihoonBrianJun/TradingRL.git
-cd AutoBinance
+cd TradingRL
 ```
 
 Python packages used for this project can be replicated by the following command.
